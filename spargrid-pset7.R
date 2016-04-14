@@ -61,3 +61,17 @@ if(any(lower >= upper)){
   return(val.sp)
 }
 
+# Measure Gains In Speed
+require("microbenchmark")
+ex_1 <- function(x){
+  return(2x)
+}
+# Essentially here we are comparing the speeds of the two integration techniques with
+# different dimensions and running parallel or no parallel.
+microbenchmark("no parallel"=spargrid_int_dim_par(ex_1,lower=lower,upper=upper,dim=1), 
+               "parallel"=spargrid_int_dim_par(ex_1,lower=lower,upper=upper, dim=1, parallel=TRUE),
+               times=10)
+microbenchmark(spargrid_int_dim_par(ex_1,lower=lower,upper=upper, dim=2), 
+               spargrid_int_dim_par(f,lower=lower,upper=upper, dim=2, parallel=TRUE),
+               times=10)
+
