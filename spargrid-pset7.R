@@ -74,4 +74,24 @@ microbenchmark("no parallel"=spargrid_int_dim_par(ex_1,lower=lower,upper=upper,d
 microbenchmark(spargrid_int_dim_par(ex_1,lower=lower,upper=upper, dim=2), 
                spargrid_int_dim_par(f,lower=lower,upper=upper, dim=2, parallel=TRUE),
                times=10)
+# Now using cubature and mvtnorm
+require("cubature")
+require("mvtnorm")
 
+# Create function with 3 dimensions to test
+ex_1 <- function(x){
+  dmvnorm(x, mean=rep(0, 3), sig=diag(rep(1, 3)))
+}
+# True integration value is below
+true_ans <- as.numeric(pmvnorm(upper=rep(1, 3), mean=rep(0, 3), sig=diag(rep(1, 3))))
+# Checking the answer using adaptIntegrate
+adaptIntegrate(ex_1, lowerLimit=rep(-1000, 3), upperLimit=rep(1, 3))$integral - true_ans
+# Checking the error
+spargrid_int_dim_par(ex_1, lower=rep(-1, 3), upper=rep(1, 3), dim=3) - true_ans
+# Checking the speeds
+microbenchmark("adapt"=adaptIntegrate(ex_1, lowerLimit=rep(-1000, 3), upperLimit=rep(1, 3))$integral,
+               "sparse"=spargrid_int_dim_par(ex_1, lower=rep(-1, 3), upper=rep(1, 3), dim=3),
+               times=10)
+microbenchmark("adapt"=adaptIntegrate(ex_1, lowerLimit=rep(-1000, 3), upperLimit=rep(1, 3))$integral,
+               "sparse"=spargrid_int_dim_par(ex_1, lower=rep(-1, 3), upper=rep(1, 3)),
+               times=10)
